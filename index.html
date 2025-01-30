@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gsap full page animation</title>
+    <link rel="stylesheet" href="./reset.css">
+    <style>
+        @font-face {
+            font-family: "Freesentation";
+            src: url("./font/Freesentation_VF.woff2") format("woff2");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html {
+            overflow: hidden;
+            font-family: "Freesentation";
+        }
+
+        section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+        }
+
+        h2 {
+            font-size: 6.25rem;
+        }
+
+        footer {
+            padding: 6.25rem;
+            font-size: 3rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <header></header>
+    <main>
+        <section id="visual">
+            <h2 class="title">section 1</h2>
+        </section>
+
+        <section id="slider">
+            <h2 class="title">section 2</h2>
+        </section>
+
+        <section id="contents">
+            <h2 class="title">section 3</h2>
+        </section>
+    </main>
+    <footer>footer</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        const sections = document.querySelectorAll("section");
+        const footer = document.querySelector("footer");
+        const totalSections = sections.length + 1;
+        let currentSection = 0;
+        let isAnimating = false;
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let touchStartTime = 0;
+
+        // 🌟 현재 브라우저 높이(px)로 섹션 크기 설정
+        function setSectionHeight() {
+            const viewportHeight = window.innerHeight;
+            sections.forEach(section => {
+                section.style.height = `${viewportHeight}px`;
+            });
+        }
+
+        // 🌟 특정 섹션으로 스크롤 이동
+        function scrollToSection(index) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            gsap.to(window, {
+                duration: 0.8,
+                scrollTo: {
+                    y: index === totalSections - 1 ? footer : sections[index],
+                    autoKill: false
+                },
+                ease: "power2.out",
+                onComplete: () => {
+                    isAnimating = false;
+                }
+            });
+        }
+
+        // 🌟 PC 마우스 휠 이벤트
+        function wheelEvent(e) {
+            if (isAnimating) return;
+
+            let direction = e.deltaY > 0 ? 1 : -1;
+            let nextSection = currentSection + direction;
+
+            if (nextSection >= 0 && nextSection < totalSections) {
+                currentSection = nextSection;
+                scrollToSection(currentSection);
+            }
+        }
+
+        // 🌟 모바일 터치 이벤트 개선
+        function touchStart(e) {
+            touchStartY = e.touches[0].clientY;
+            touchEndY = touchStartY;
+            touchStartTime = Date.now();
+        }
+
+        function touchMove(e) {
+            touchEndY = e.touches[0].clientY; // 이동 중 위치 저장
+        }
+
+        function touchEnd() {
+            let delta = touchStartY - touchEndY; // 터치 이동 거리 계산
+            let elapsedTime = Date.now() - touchStartTime; // 터치한 시간 차이
+            let threshold = 30; // 터치 이동 최소 거리(px)
+            let fastSwipeThreshold = 200; // 빠르게 스와이프한 경우(ms)
+
+            // 🔥 이동 거리가 충분히 크거나, 빠르게 스와이프한 경우 실행
+            if (Math.abs(delta) > threshold || elapsedTime < fastSwipeThreshold) {
+                let nextSection = currentSection + (delta > 0 ? 1 : -1);
+
+                if (nextSection >= 0 && nextSection < totalSections) {
+                    currentSection = nextSection;
+                    requestAnimationFrame(() => scrollToSection(currentSection));
+                }
+            }
+        }
+
+        // 🌟 이벤트 리스너 추가
+        window.addEventListener("load", setSectionHeight);
+        window.addEventListener("resize", setSectionHeight);
+        window.addEventListener("wheel", wheelEvent);
+        window.addEventListener("touchstart", touchStart);
+        window.addEventListener("touchmove", touchMove);
+        window.addEventListener("touchend", touchEnd);
+
+        // gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // const sections = document.querySelectorAll("section");
+        // const footer = document.querySelector("footer");
+        // const totalSections = sections.length + 1;
+        // let currentSection = 0;
+        // let isAnimating = false;
+        // let touchStartY = 0;
+        // let touchEndY = 0;
+
+        // // 🌟 현재 브라우저 높이(px)로 섹션 크기 설정
+        // function setSectionHeight() {
+        //     const viewportHeight = window.innerHeight;
+        //     sections.forEach(section => {
+        //         section.style.height = `${viewportHeight}px`;
+        //     });
+        // }
+
+        // // 🌟 특정 섹션으로 스크롤 이동
+        // function scrollToSection(index) {
+        //     if (isAnimating) return;
+        //     isAnimating = true;
+
+        //     gsap.to(window, {
+        //         duration: 0.8,
+        //         scrollTo: {
+        //             y: index === totalSections - 1 ? footer : sections[index],
+        //             autoKill: false
+        //         },
+        //         ease: "power2.out",
+        //         onComplete: () => {
+        //             isAnimating = false;
+        //         }
+        //     });
+        // }
+
+        // // 🌟 PC 마우스 휠 이벤트
+        // function wheelEvent(e) {
+        //     if (isAnimating) return;
+
+        //     let direction = e.deltaY > 0 ? 1 : -1;
+        //     let nextSection = currentSection + direction;
+
+        //     if (nextSection >= 0 && nextSection < totalSections) {
+        //         currentSection = nextSection;
+        //         scrollToSection(currentSection);
+        //     }
+        // }
+
+        // // 🌟 모바일 터치 이벤트
+        // function touchStart(e) {
+        //     touchStartY = e.touches[0].clientY;
+        // }
+
+        // function touchMove(e) {
+        //     touchEndY = e.touches[0].clientY; // 이동 중 위치 저장
+        // }
+
+        // function touchEnd() {
+        //     let delta = touchStartY - touchEndY; // 터치 이동 거리 계산
+        //     let threshold = 10; // 최소 이동 거리 (50px)
+
+        //     if (Math.abs(delta) > threshold) { // 🔥 50px 이상 이동했을 때만 실행
+        //         let nextSection = currentSection + (delta > 0 ? 1 : -1);
+
+        //         if (nextSection >= 0 && nextSection < totalSections) {
+        //             currentSection = nextSection;
+        //             scrollToSection(currentSection);
+        //         }
+        //     }
+        // }
+
+        // // 🌟 이벤트 리스너 추가
+        // window.addEventListener("load", setSectionHeight);
+        // window.addEventListener("resize", setSectionHeight);
+        // window.addEventListener("wheel", wheelEvent);
+        // window.addEventListener("touchstart", touchStart);
+        // window.addEventListener("touchmove", touchMove);
+        // window.addEventListener("touchend", touchEnd);
+
+
+        // gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // const sections = document.querySelectorAll("section");
+        // const footer = document.querySelector("footer");
+        // const totalSections = sections.length + 1;
+        // let currentSection = 0;
+        // let isAnimating = false;
+        // let touchStartY = 0;
+        // let lastTouchY = 0;
+        // let touchDirection = 0; // 터치 방향 (1: 아래로, -1: 위로)
+
+        // // 🌟 현재 브라우저 높이(px)로 섹션 크기 설정
+        // function setSectionHeight() {
+        //     const viewportHeight = window.innerHeight;
+        //     sections.forEach(section => {
+        //         section.style.height = `${viewportHeight}px`;
+        //     });
+        // }
+
+        // // 🌟 특정 섹션으로 스크롤 이동
+        // function scrollToSection(index) {
+        //     if (isAnimating) return;
+        //     isAnimating = true;
+
+        //     gsap.to(window, {
+        //         duration: 1,
+        //         scrollTo: {
+        //             y: index === totalSections - 1 ? footer : sections[index],
+        //             autoKill: false
+        //         },
+        //         ease: "power2.out",
+        //         onComplete: () => {
+        //             isAnimating = false;
+        //         }
+        //     });
+        // }
+
+        // // 🌟 PC 마우스 휠 이벤트
+        // function wheelEvent(e) {
+        //     if (isAnimating) return;
+
+        //     let direction = e.deltaY > 0 ? 1 : -1;
+        //     let nextSection = currentSection + direction;
+
+        //     if (nextSection >= 0 && nextSection < totalSections) {
+        //         currentSection = nextSection;
+        //         scrollToSection(currentSection);
+        //     }
+        // }
+
+        // // 🌟 모바일 터치 이벤트
+        // function touchStart(e) {
+        //     touchStartY = e.touches[0].clientY;
+        //     lastTouchY = touchStartY; // 초기화
+        //     touchDirection = 0; // 방향 초기화
+        // }
+
+        // function touchMove(e) {
+        //     let currentTouchY = e.touches[0].clientY;
+        //     let delta = lastTouchY - currentTouchY; // 터치 이동 거리
+        //     lastTouchY = currentTouchY;
+
+        //     // 터치 방향 감지
+        //     if (Math.abs(delta) > 10) { // 작은 움직임 무시
+        //         touchDirection = delta > 0 ? 1 : -1;
+        //     }
+        // }
+
+        // function touchEnd() {
+        //     if (touchDirection !== 0) { // 방향이 감지된 경우에만 이동
+        //         let nextSection = currentSection + touchDirection;
+
+        //         if (nextSection >= 0 && nextSection < totalSections) {
+        //             currentSection = nextSection;
+        //             scrollToSection(currentSection);
+        //         }
+        //     }
+        // }
+
+        // // 🌟 이벤트 리스너 추가
+        // window.addEventListener("load", setSectionHeight);
+        // window.addEventListener("resize", setSectionHeight);
+        // window.addEventListener("wheel", wheelEvent);
+        // window.addEventListener("touchstart", touchStart);
+        // window.addEventListener("touchmove", touchMove);
+        // window.addEventListener("touchend", touchEnd);
+
+
+    </script>
+    <!-- <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        const sections = document.querySelectorAll("section");
+        const footer = document.querySelector("footer");
+        const totalSections = sections.length + 1;
+        let currentSection = 0;
+        let isAnimating = false;
+
+        // 현재 스크롤 위치를 기반으로 currentSection 설정
+        function updateCurrentSection() {
+            let scrollY = window.scrollY;
+            sections.forEach((section, index) => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+                    currentSection = index;
+                };
+            });
+
+            // 푸터에 있는 경우 마지막 섹션으로 설정
+            if (scrollY + window.innerHeight >= document.body.scrollHeight) {
+                currentSection = totalSections - 1;
+            };
+        };
+
+        // 새로고침 시 초기 섹션 업데이트
+        window.addEventListener("load", updateCurrentSection);
+
+        function scrollToSection(index) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            if (index === totalSections - 1) {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: {
+                        y: footer,
+                        autoKill: false
+                    },
+                    ease: "power2.out",
+                    onComplete: () => {
+                        isAnimating = false;
+                    },
+                });
+            } else {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: {
+                        y: sections[index],
+                        autoKill: false
+                    },
+                    ease: "power2.out",
+                    onComplete: () => {
+                        isAnimating = false;
+                    }
+                });
+            };
+        };
+
+        function wheelEvent(e) {
+            if (isAnimating) return;
+
+            if (e.deltaY > 0 && currentSection < totalSections - 1) {
+                currentSection++;
+                scrollToSection(currentSection);
+            } else if (e.deltaY < 0 && currentSection > 0) {
+                currentSection--;
+                scrollToSection(currentSection);
+            };
+        };
+
+        window.addEventListener("wheel", wheelEvent);
+
+        function setSectionHeight() {
+            const viewportHeight = window.innerHeight; // 현재 브라우저 높이(px)
+            sections.forEach(section => {
+                section.style.height = `${viewportHeight}px`;
+            });
+        };
+
+        // 초기 실행 및 윈도우 크기 변경 시 업데이트
+        window.addEventListener("load", setSectionHeight);
+        window.addEventListener("resize", setSectionHeight);
+    </script> -->
+</body>
+
+</html>
