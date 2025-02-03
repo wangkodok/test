@@ -1,0 +1,66 @@
+@charset "utf-8";
+
+/* 여백 초기화 */ 
+body, div, ul, li, ol, dl, dt, dd, h1, h2, h3, h4, h5, h6, input, fieldset, figure, legend, p, select, table, th, td, tr, textarea, button, form, blockquote, address, thead, tbody, tfoot, caption {
+  margin: 0;
+  padding: 0;
+}
+
+/* 폰트 설정 */
+html {
+  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", "Dotum", "Helvetica","Apple SD Gothic Neo", serif;
+  -webkit-text-size-adjust: 100%;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* a 링크 초기화 */
+a {
+  text-decoration: none;
+  color: initial;
+}
+
+/* 블릿기호 초기화 */
+ul, ol {
+  list-style: none;
+}
+
+/* 이미지 공백 처리 */
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: bottom;
+}
+
+/* 버튼 초기화 */
+button {
+  border: none;
+  font: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+/* 입력 요소 초기화 */
+input, textarea, select, button {
+  font: inherit;
+  color: inherit;
+}
+
+/* 테이블 초기화 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 웹 접근성 스크린리더기 */
+.blind {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
