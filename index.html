@@ -17,6 +17,7 @@
         html {
             overflow: hidden;
             font-family: "Freesentation";
+            font-size: 10px;
         }
 
         section {
@@ -27,7 +28,8 @@
         }
 
         h2 {
-            font-size: 6.25rem;
+            /* font-size: 6.25rem; */
+            font-size: 10.417vw;
         }
 
         footer {
@@ -67,8 +69,9 @@
         let currentSection = 0;
         let isAnimating = false;
         let touchStartY = 0;
-        let touchEndY = 0;
+        let lastTouchY = 0; // 🔥 이전 터치 위치 저장
         let touchStartTime = 0;
+        let isTouching = false;
 
         // 🌟 현재 브라우저 높이(px)로 섹션 크기 설정
         function setSectionHeight() {
@@ -112,29 +115,31 @@
         // 🌟 모바일 터치 이벤트 개선
         function touchStart(e) {
             touchStartY = e.touches[0].clientY;
-            touchEndY = touchStartY;
+            lastTouchY = touchStartY; // 🔥 시작할 때 이전 터치 위치 초기화
             touchStartTime = Date.now();
+            isTouching = true;
         }
 
         function touchMove(e) {
-            touchEndY = e.touches[0].clientY; // 이동 중 위치 저장
-        }
+            if (!isTouching || isAnimating) return;
 
-        function touchEnd() {
-            let delta = touchStartY - touchEndY; // 터치 이동 거리 계산
-            let elapsedTime = Date.now() - touchStartTime; // 터치한 시간 차이
-            let threshold = 30; // 터치 이동 최소 거리(px)
-            let fastSwipeThreshold = 200; // 빠르게 스와이프한 경우(ms)
+            let touchCurrentY = e.touches[0].clientY;
+            let delta = lastTouchY - touchCurrentY; // 🔥 마지막 위치와 현재 위치 차이 계산
+            let threshold = 30;
 
-            // 🔥 이동 거리가 충분히 크거나, 빠르게 스와이프한 경우 실행
-            if (Math.abs(delta) > threshold || elapsedTime < fastSwipeThreshold) {
+            if (Math.abs(delta) > threshold) {
                 let nextSection = currentSection + (delta > 0 ? 1 : -1);
 
                 if (nextSection >= 0 && nextSection < totalSections) {
                     currentSection = nextSection;
+                    lastTouchY = touchCurrentY; // 🔥 마지막 위치 갱신
                     requestAnimationFrame(() => scrollToSection(currentSection));
                 }
             }
+        }
+
+        function touchEnd() {
+            isTouching = false; // 🔥 터치 종료 시 상태 초기화
         }
 
         // 🌟 이벤트 리스너 추가
@@ -144,7 +149,8 @@
         window.addEventListener("touchstart", touchStart);
         window.addEventListener("touchmove", touchMove);
         window.addEventListener("touchend", touchEnd);
-
+    </script>
+    <script>
         // gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
         // const sections = document.querySelectorAll("section");
